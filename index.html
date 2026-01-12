@@ -29,6 +29,40 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Checkbox Customizado */
+        .custom-checkbox {
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.25em;
+            height: 1.25em;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.35em;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .custom-checkbox:checked {
+            background-color: var(--brand-color);
+            border-color: var(--brand-color);
+        }
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
         /* Área de Drag & Drop */
         .drag-area {
             border: 2px dashed #cbd5e1;
@@ -55,8 +89,13 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             border-color: var(--brand-light);
         }
+        .preview-card.selected {
+            border-color: var(--brand-color);
+            background-color: #fff7ed;
+            box-shadow: 0 0 0 2px var(--brand-color);
+        }
 
-        /* Inputs Editáveis (Parecem texto até clicar) */
+        /* Inputs Editáveis */
         .editable-input {
             background: transparent;
             border: 1px solid transparent;
@@ -77,13 +116,12 @@
             box-shadow: 0 0 0 2px rgba(98, 49, 27, 0.1);
         }
 
-        /* Cores da Marca */
+        /* Utility Classes */
         .text-brand { color: var(--brand-color); }
         .bg-brand { background-color: var(--brand-color); }
         .hover-bg-brand:hover { background-color: #4a2413; }
         .border-brand { border-color: var(--brand-color); }
 
-        /* Animações */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -91,9 +129,17 @@
         .animate-fade-in {
             animation: fadeIn 0.4s ease-out forwards;
         }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col pb-24"> <!-- Added padding bottom for bulk bar space -->
 
     <!-- Top Bar -->
     <header class="bg-brand text-white shadow-lg sticky top-0 z-50">
@@ -110,7 +156,7 @@
             <div class="hidden md:flex items-center gap-4 text-xs font-medium bg-white/10 px-4 py-2 rounded-full">
                 <span class="flex items-center gap-2"><i class="fa-solid fa-check-circle"></i> Formato 1300x1600px</span>
                 <span class="w-px h-3 bg-white/30"></span>
-                <span class="flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Auto-Leitura</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-tags"></i> Precificação</span>
             </div>
         </div>
     </header>
@@ -137,8 +183,6 @@
                                 <p class="text-xs text-slate-500 font-semibold uppercase group-hover:text-brand transition-colors">Carregar Logo</p>
                             </div>
                             <img id="logoPreview" class="hidden w-full h-full object-contain p-4 z-10" alt="Preview Logo">
-                            
-                            <!-- Botão Trocar (aparece só quando tem logo) -->
                             <div id="changeLogoBtn" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                 <span class="text-white text-xs font-bold uppercase border border-white px-3 py-1 rounded-full">Trocar</span>
                             </div>
@@ -150,26 +194,21 @@
                 <!-- Card Instruções -->
                 <div class="bg-blue-50 rounded-2xl border border-blue-100 p-6">
                     <h3 class="font-bold text-blue-900 mb-3 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-circle-info"></i> Padrão de Arquivo
+                        <i class="fa-solid fa-circle-info"></i> Dicas de Uso
                     </h3>
-                    <div class="bg-white p-3 rounded-lg border border-blue-200 mb-3 shadow-sm">
-                        <code class="text-xs font-mono text-slate-600 block break-all">
-                            <span class="text-brand font-bold">Produto</span> - <span class="text-blue-600 font-bold">Cor</span> [<span class="text-purple-600 font-bold">Cód</span>] ... .jpg
-                        </code>
-                    </div>
                     <ul class="text-xs text-blue-800 space-y-2 ml-1">
                         <li class="flex items-start gap-2">
                             <i class="fa-solid fa-check text-[10px] mt-1 opacity-60"></i>
-                            <span>O sistema preenche tudo automaticamente se o nome estiver correto.</span>
+                            <span><strong>Seleção em Massa:</strong> Marque as caixas nos produtos para editar o preço de vários de uma vez.</span>
                         </li>
                         <li class="flex items-start gap-2">
                             <i class="fa-solid fa-check text-[10px] mt-1 opacity-60"></i>
-                            <span>Você pode <strong>editar qualquer texto</strong> antes de gerar o PDF.</span>
+                            <span><strong>Padrão de Arquivo:</strong> Nome - Cor [Código].jpg</span>
                         </li>
                     </ul>
                 </div>
 
-                <!-- Botão Gerar (Fixo na Sidebar em telas grandes) -->
+                <!-- Botão Gerar (Desktop) -->
                 <div class="hidden lg:block bg-white rounded-2xl shadow-lg border border-slate-100 p-6 sticky top-24">
                     <div id="desktopControls" class="opacity-50 pointer-events-none transition-opacity">
                         <div class="flex justify-between text-sm text-slate-500 mb-4">
@@ -193,15 +232,21 @@
                 
                 <!-- Área de Drop -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <span class="bg-brand text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
-                        Imagens dos Produtos
-                    </h2>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span class="bg-brand text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
+                            Produtos
+                        </h2>
+                        
+                        <!-- Select All Checkbox (Hidden initially) -->
+                        <div id="selectAllContainer" class="hidden flex items-center gap-2">
+                            <input type="checkbox" id="selectAll" class="custom-checkbox" onchange="toggleSelectAll(this.checked)">
+                            <label for="selectAll" class="text-xs font-bold text-slate-500 cursor-pointer select-none">Selecionar Todos</label>
+                        </div>
+                    </div>
 
-                    <!-- Status Message -->
                     <div id="statusMessage" class="hidden mb-4 p-4 rounded-xl text-sm font-bold flex items-center gap-3 animate-fade-in"></div>
                     
-                    <!-- Progress Bar -->
                     <div id="progressContainer" class="hidden mb-6 bg-slate-100 rounded-full h-4 overflow-hidden shadow-inner">
                         <div id="progressBar" class="bg-brand h-full w-0 transition-all duration-300 flex items-center justify-center text-[9px] text-white font-bold"></div>
                     </div>
@@ -211,46 +256,59 @@
                             <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand"></i>
                         </div>
                         <h3 class="text-slate-800 font-bold text-lg">Arraste as fotos aqui</h3>
-                        <p class="text-slate-500 text-sm mt-1">ou clique para selecionar do computador</p>
-                        <p class="text-slate-400 text-xs mt-4 bg-slate-100 px-3 py-1 rounded-full">Suporta JPG, PNG</p>
+                        <p class="text-slate-500 text-sm mt-1">ou clique para selecionar</p>
                         <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
                     </div>
 
-                    <!-- Grid de Produtos -->
                     <div id="previewGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-8 hidden">
                         <!-- Itens injetados via JS -->
                     </div>
 
-                    <!-- Botão Adicionar Mais (Visível quando há itens) -->
                     <div id="addMoreBtn" class="hidden mt-8 text-center">
                         <button onclick="document.getElementById('fileInput').click()" class="inline-flex items-center gap-2 text-slate-500 hover:text-brand font-bold text-sm bg-slate-50 hover:bg-orange-50 px-6 py-3 rounded-full transition-colors border border-slate-200 hover:border-brand">
                             <i class="fa-solid fa-plus"></i> Adicionar mais imagens
                         </button>
                     </div>
                 </div>
-
-                <!-- Controles Mobile (Aparece só em telas pequenas) -->
-                <div class="lg:hidden bg-white rounded-2xl shadow-lg border border-slate-100 p-6 sticky bottom-4 z-40">
-                    <div id="mobileControls" class="opacity-50 pointer-events-none">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-xs font-bold text-slate-500"><span id="mobileCount">0</span> itens</span>
-                            <button onclick="clearFiles()" class="text-red-500 text-xs font-bold">Limpar</button>
-                        </div>
-                        <button onclick="generatePDF()" class="w-full bg-brand text-white py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-pdf"></i> Baixar PDF
-                        </button>
-                    </div>
-                </div>
-
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-slate-800 text-slate-400 py-8 mt-12 text-center text-xs">
-        <p class="font-bold text-slate-300 mb-1">Goulart Hair &copy; 2025</p>
-        <p>Ferramenta de uso interno da equipe de Marketing.</p>
-    </footer>
+    <!-- Barra de Ações em Massa (Fixa no fundo) -->
+    <div id="bulkActionsBar" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 flex items-center gap-6 hidden animate-slide-up w-[90%] max-w-2xl border border-slate-700">
+        <div class="flex items-center gap-3 border-r border-slate-700 pr-6">
+            <span class="bg-brand text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm" id="selectedCount">0</span>
+            <span class="text-sm font-semibold hidden sm:inline">Selecionados</span>
+        </div>
+        
+        <div class="flex-grow flex items-center gap-3">
+            <label class="text-xs font-bold text-slate-400 uppercase">Definir Valor:</label>
+            <div class="relative flex-grow">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                <input type="text" id="bulkPriceInput" class="w-full bg-slate-800 border border-slate-600 rounded-lg py-2 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-brand transition-colors" placeholder="0,00">
+            </div>
+            <button onclick="applyBulkPrice()" class="bg-brand hover:bg-white hover:text-brand text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                Aplicar
+            </button>
+        </div>
+
+        <button onclick="clearSelection()" class="text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Controles Mobile -->
+    <div class="lg:hidden bg-white rounded-2xl shadow-lg border border-slate-100 p-6 sticky bottom-4 z-40 mx-4">
+        <div id="mobileControls" class="opacity-50 pointer-events-none">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold text-slate-500"><span id="mobileCount">0</span> itens</span>
+                <button onclick="clearFiles()" class="text-red-500 text-xs font-bold">Limpar</button>
+            </div>
+            <button onclick="generatePDF()" class="w-full bg-brand text-white py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-pdf"></i> Baixar PDF
+            </button>
+        </div>
+    </div>
 
     <script>
         // --- Elementos ---
@@ -269,6 +327,11 @@
         const logoPreview = document.getElementById('logoPreview');
         const logoPlaceholder = document.getElementById('logoPlaceholder');
         const changeLogoBtn = document.getElementById('changeLogoBtn');
+        const bulkActionsBar = document.getElementById('bulkActionsBar');
+        const selectedCountSpan = document.getElementById('selectedCount');
+        const bulkPriceInput = document.getElementById('bulkPriceInput');
+        const selectAllContainer = document.getElementById('selectAllContainer');
+        const selectAllCheckbox = document.getElementById('selectAll');
 
         // --- Estado Global ---
         let catalogItems = []; 
@@ -285,13 +348,13 @@
                     logoPreview.classList.remove('hidden');
                     logoPlaceholder.classList.add('hidden');
                     changeLogoBtn.classList.remove('hidden');
-                    showStatus('Logo atualizada com sucesso!', 'success');
+                    showStatus('Logo atualizada!', 'success');
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // --- Drag & Drop Handlers ---
+        // --- Drag & Drop ---
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('active'); });
         dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('active'); });
         dropZone.addEventListener('drop', (e) => {
@@ -302,19 +365,17 @@
         dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
-        // --- Core Logic ---
+        // --- Lógica Principal ---
 
         function handleFiles(files) {
             if (!files.length) return;
-            
             const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
             
             if (newFiles.length === 0) {
-                showStatus('Por favor, envie apenas arquivos de imagem (JPG/PNG).', 'error');
+                showStatus('Envie apenas imagens (JPG/PNG).', 'error');
                 return;
             }
 
-            // Processar arquivos
             newFiles.forEach(file => {
                 const data = parseFilename(file.name);
                 catalogItems.push({
@@ -323,54 +384,40 @@
                     name: data.name,
                     color: data.color,
                     code: data.code,
+                    price: "", // Novo campo de preço
+                    selected: false, // Controle de seleção
                     isValid: data.isValid
                 });
             });
 
             updateUI();
-            showStatus(`${newFiles.length} novos produtos adicionados!`, 'success');
-            
-            // Scroll suave até a lista se for a primeira adição
-            if (catalogItems.length === newFiles.length) {
-                previewGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            
-            fileInput.value = ''; // Reset input
+            showStatus(`${newFiles.length} produtos adicionados!`, 'success');
+            fileInput.value = '';
         }
 
         function parseFilename(filename) {
-            // Limpeza básica
             let clean = filename.replace(/\.[^/.]+$/, "").replace(/['"]+/g, "");
-            
             let name = "Nome do Produto";
             let color = "Cor...";
             let code = "000";
             let isValid = false;
 
-            // Lógica de extração: Nome - Cor [Código]
             const parts = clean.split('-');
-            
             if (parts.length >= 2) {
                 name = parts[0].trim();
-                
-                // O restante (cor + código)
                 const rest = parts.slice(1).join('-').trim();
-                
-                // Busca código entre colchetes
                 const matchCode = rest.match(/\[(.*?)\]/);
                 
                 if (matchCode) {
                     code = matchCode[1].trim();
-                    // A cor é tudo antes do primeiro colchete
                     color = rest.split('[')[0].trim();
                     isValid = true;
                 } else {
-                    color = rest; // Assume tudo como cor se não achar código
+                    color = rest;
                     code = "N/A";
                 }
             } else {
                 name = clean;
-                isValid = false;
             }
 
             return { name, color, code, isValid };
@@ -379,67 +426,83 @@
         function updateUI() {
             previewGrid.innerHTML = '';
             
-            // Atualizar contadores
             desktopCount.textContent = catalogItems.length;
             mobileCount.textContent = catalogItems.length;
 
             if (catalogItems.length > 0) {
                 previewGrid.classList.remove('hidden');
                 addMoreBtn.classList.remove('hidden');
-                dropZone.classList.add('hidden'); // Ocultar área de drop grande
+                dropZone.classList.add('hidden');
+                selectAllContainer.classList.remove('hidden');
                 
-                // Habilitar botões de gerar
                 desktopControls.classList.remove('opacity-50', 'pointer-events-none');
                 mobileControls.classList.remove('opacity-50', 'pointer-events-none');
+
+                // Verificar estado do Select All
+                const allSelected = catalogItems.length > 0 && catalogItems.every(i => i.selected);
+                selectAllCheckbox.checked = allSelected;
 
                 catalogItems.forEach((item, index) => {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const div = document.createElement('div');
-                        // Usamos animate-fade-in para entrada suave
-                        div.className = 'preview-card bg-white rounded-xl overflow-hidden relative group animate-fade-in flex flex-col h-full';
-                        div.style.animationDelay = `${index * 50}ms`; // Stagger effect
-
-                        const statusIcon = item.isValid 
-                            ? `<i class="fa-solid fa-check text-green-500" title="Padrão reconhecido"></i>` 
-                            : `<i class="fa-solid fa-triangle-exclamation text-orange-400" title="Verifique o nome"></i>`;
+                        const isSelectedClass = item.selected ? 'selected' : '';
+                        
+                        div.className = `preview-card bg-white rounded-xl overflow-hidden relative group animate-fade-in flex flex-col h-full ${isSelectedClass}`;
+                        div.style.animationDelay = `${index * 50}ms`;
 
                         div.innerHTML = `
-                            <!-- Imagem Preview -->
-                            <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden border-b border-slate-100">
+                            <!-- Header Imagem -->
+                            <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden border-b border-slate-100 group-hover:border-brand/20 transition-colors">
                                 <img src="${e.target.result}" class="w-full h-full object-cover" alt="Preview">
                                 
-                                <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm text-xs">
-                                    ${statusIcon}
+                                <!-- Checkbox de Seleção -->
+                                <div class="absolute top-2 left-2 z-10">
+                                    <input type="checkbox" class="custom-checkbox shadow-md" 
+                                           ${item.selected ? 'checked' : ''} 
+                                           onchange="toggleSelection(${index})">
                                 </div>
-                                
-                                <button onclick="removeItem(${index})" class="absolute top-2 left-2 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center transition-transform transform scale-0 group-hover:scale-100 hover:bg-red-600">
+
+                                <!-- Botão Remover -->
+                                <button onclick="removeItem(${index})" class="absolute top-2 right-2 bg-white text-red-500 w-8 h-8 rounded-full shadow-md flex items-center justify-center transition-all hover:bg-red-500 hover:text-white z-10 opacity-0 group-hover:opacity-100">
                                     <i class="fa-solid fa-trash-can text-xs"></i>
                                 </button>
                             </div>
 
-                            <!-- Campos Editáveis -->
-                            <div class="p-4 flex flex-col gap-3 flex-grow">
+                            <!-- Campos -->
+                            <div class="p-4 flex flex-col gap-3 flex-grow bg-white">
                                 <div>
                                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Produto</label>
                                     <input type="text" value="${item.name}" 
                                            onchange="updateItem(${index}, 'name', this.value)"
-                                           class="editable-input font-bold text-brand text-lg" placeholder="Nome">
+                                           class="editable-input font-bold text-brand text-lg">
                                 </div>
                                 
-                                <div class="grid grid-cols-2 gap-4 mt-auto">
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Cor</label>
                                         <input type="text" value="${item.color}" 
                                                onchange="updateItem(${index}, 'color', this.value)"
-                                               class="editable-input text-sm font-semibold text-slate-600" placeholder="Cor">
+                                               class="editable-input text-sm font-semibold text-slate-600">
                                     </div>
                                     <div class="text-right">
                                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Cód</label>
                                         <input type="text" value="${item.code}" 
                                                onchange="updateItem(${index}, 'code', this.value)"
-                                               class="editable-input text-sm font-mono font-bold text-slate-700 text-right bg-slate-50" placeholder="000">
+                                               class="editable-input text-sm font-mono font-bold text-slate-700 text-right bg-slate-50">
                                     </div>
+                                </div>
+
+                                <!-- Campo de Preço -->
+                                <div class="pt-2 mt-auto border-t border-slate-100">
+                                    <label class="text-[10px] font-bold text-brand uppercase tracking-wider mb-1 block flex justify-between">
+                                        <span>Valor (R$)</span>
+                                        <i class="fa-solid fa-tag opacity-50"></i>
+                                    </label>
+                                    <input type="text" value="${item.price}" 
+                                           onchange="updateItem(${index}, 'price', this.value)"
+                                           class="editable-input text-base font-bold text-slate-800 bg-orange-50/50" 
+                                           placeholder="0,00">
                                 </div>
                             </div>
                         `;
@@ -447,15 +510,61 @@
                     };
                     reader.readAsDataURL(item.file);
                 });
+                
+                updateBulkActionBar();
+
             } else {
                 previewGrid.classList.add('hidden');
                 addMoreBtn.classList.add('hidden');
                 dropZone.classList.remove('hidden');
-                
-                // Desabilitar botões
+                selectAllContainer.classList.add('hidden');
+                bulkActionsBar.classList.add('hidden');
                 desktopControls.classList.add('opacity-50', 'pointer-events-none');
                 mobileControls.classList.add('opacity-50', 'pointer-events-none');
             }
+        }
+
+        // --- Funções de Seleção e Edição em Massa ---
+
+        function toggleSelection(index) {
+            catalogItems[index].selected = !catalogItems[index].selected;
+            updateUI(); // Re-render para mostrar estilo selecionado
+        }
+
+        function toggleSelectAll(checked) {
+            catalogItems.forEach(item => item.selected = checked);
+            updateUI();
+        }
+
+        function clearSelection() {
+            catalogItems.forEach(item => item.selected = false);
+            updateUI();
+        }
+
+        function updateBulkActionBar() {
+            const selectedItems = catalogItems.filter(i => i.selected);
+            selectedCountSpan.textContent = selectedItems.length;
+
+            if (selectedItems.length > 0) {
+                bulkActionsBar.classList.remove('hidden');
+            } else {
+                bulkActionsBar.classList.add('hidden');
+            }
+        }
+
+        function applyBulkPrice() {
+            const price = bulkPriceInput.value;
+            let count = 0;
+            catalogItems.forEach(item => {
+                if (item.selected) {
+                    item.price = price;
+                    item.selected = false; // Desmarcar após aplicar
+                    count++;
+                }
+            });
+            bulkPriceInput.value = '';
+            updateUI();
+            showStatus(`Valor aplicado a ${count} produtos!`, 'success');
         }
 
         function updateItem(index, field, value) {
@@ -468,33 +577,21 @@
         }
 
         function clearFiles() {
-            if(confirm('Tem certeza que deseja remover todas as imagens?')) {
+            if(confirm('Remover todas as imagens?')) {
                 catalogItems = [];
                 fileInput.value = '';
                 updateUI();
-                showStatus('Lista limpa.', 'neutral');
             }
         }
 
         function showStatus(msg, type) {
-            const colors = {
-                success: 'bg-green-100 text-green-800 border-green-200',
-                error: 'bg-red-100 text-red-800 border-red-200',
-                neutral: 'bg-blue-50 text-blue-800 border-blue-200'
-            };
-            const icon = {
-                success: '<i class="fa-solid fa-circle-check"></i>',
-                error: '<i class="fa-solid fa-circle-exclamation"></i>',
-                neutral: '<i class="fa-solid fa-info-circle"></i>'
-            };
-
-            statusMessage.className = `fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold text-sm ${colors[type] || colors.neutral} animate-fade-in`;
+            const colors = { success: 'bg-green-100 text-green-800', error: 'bg-red-100 text-red-800', neutral: 'bg-blue-50 text-blue-800' };
+            const icon = { success: '<i class="fa-solid fa-circle-check"></i>', error: '<i class="fa-solid fa-circle-exclamation"></i>', neutral: '<i class="fa-solid fa-info-circle"></i>' };
+            
+            statusMessage.className = `fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[60] px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold text-sm ${colors[type] || colors.neutral} animate-fade-in`;
             statusMessage.innerHTML = `${icon[type] || icon.neutral} <span>${msg}</span>`;
             statusMessage.classList.remove('hidden');
-
-            setTimeout(() => {
-                statusMessage.classList.add('hidden');
-            }, 4000);
+            setTimeout(() => statusMessage.classList.add('hidden'), 4000);
         }
 
         // --- Geração de PDF ---
@@ -503,24 +600,11 @@
             if (catalogItems.length === 0) return;
 
             const { jsPDF } = window.jspdf;
-            
-            // Configurações: 1300x1600px
-            const doc = new jsPDF({ 
-                orientation: 'portrait', 
-                unit: 'px', 
-                format: [1300, 1600]
-            });
-
-            // Metadados
-            doc.setProperties({
-                title: 'Catálogo Goulart Hair',
-                author: 'Goulart Hair Marketing',
-                creator: 'Gerador de Catálogo 3.0'
-            });
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'px', format: [1300, 1600] });
 
             const pageWidth = 1300;
             const pageHeight = 1600;
-            const margin = 80; // Margem generosa
+            const margin = 80;
             const brandColor = "#62311b"; 
 
             progressContainer.classList.remove('hidden');
@@ -528,94 +612,101 @@
             progressBar.textContent = 'Iniciando...';
 
             try {
-                // Preparar Logo
                 let logoImg = null;
                 let logoDims = { w: 0, h: 0 };
                 
                 if (logoDataUrl) {
                     try {
                         logoImg = await loadImage(logoDataUrl);
-                        // Altura fixa de 140px para a logo no cabeçalho
                         const targetH = 140; 
                         const ratio = logoImg.width / logoImg.height;
                         logoDims.h = targetH;
                         logoDims.w = targetH * ratio;
-                    } catch(e) { 
-                        console.warn("Logo não carregada", e); 
-                    }
+                    } catch(e) { console.warn("Erro logo", e); }
                 }
 
                 for (let i = 0; i < catalogItems.length; i++) {
                     const item = catalogItems[i];
-                    
                     if (i > 0) doc.addPage();
                     
-                    // Fundo Branco (Segurança para impressão)
                     doc.setFillColor(255, 255, 255);
                     doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-                    // --- 1. CABEÇALHO ---
+                    // --- Header ---
                     const headerY = margin;
-                    
-                    // Logo (Esquerda)
                     if (logoImg) {
                         doc.addImage(logoDataUrl, 'PNG', margin, headerY, logoDims.w, logoDims.h);
                     }
-
-                    // Título (Direita) - Alinhado verticalmente com o centro da logo
                     doc.setFont("helvetica", "normal");
                     doc.setFontSize(36);
                     doc.setTextColor(brandColor);
-                    // Ajuste fino vertical para alinhar com logo
                     const textY = headerY + (logoDims.h ? logoDims.h / 1.5 : 50); 
                     doc.text("Catálogo Goulart hair", pageWidth - margin, textY, { align: 'right' });
 
-
-                    // --- 2. RODAPÉ ---
-                    const footerY = pageHeight - margin; // Linha base do rodapé
+                    // --- Footer ---
+                    const footerY = pageHeight - margin;
                     
-                    // Layout do rodapé:
-                    // Esquerda: Nome do Produto (Grande)
-                    // Direita: Detalhes Técnicos (Alinhados à direita)
-
-                    // Nome do Produto
+                    // Nome (Esq)
                     doc.setFont("helvetica", "bold");
                     doc.setFontSize(60); 
                     doc.setTextColor(brandColor);
-                    // Usar baseline 'bottom' facilita alinhar com a margem inferior
                     doc.text((item.name || "").toUpperCase(), margin, footerY);
 
-                    // Detalhes Técnicos (Direita)
+                    // Detalhes (Dir)
                     const detailsFontSize = 38;
                     const lineHeight = 55;
-                    doc.setFontSize(detailsFontSize);
                     
-                    // Código (Linha inferior, alinhada com o nome do produto)
+                    // Cód (Linha inferior)
+                    doc.setFontSize(detailsFontSize);
                     doc.setFont("helvetica", "bold");
-                    const codText = `Cód: ${item.code || ""}`;
-                    doc.text(codText, pageWidth - margin, footerY, { align: 'right' });
+                    doc.text(`Cód: ${item.code || ""}`, pageWidth - margin, footerY, { align: 'right' });
 
                     // Cor (Linha superior)
-                    const corText = `Cor: ${item.color || ""}`;
-                    doc.text(corText, pageWidth - margin, footerY - lineHeight, { align: 'right' });
+                    doc.text(`Cor: ${item.color || ""}`, pageWidth - margin, footerY - lineHeight, { align: 'right' });
 
+                    // --- Badge de Preço (NOVO) ---
+                    // Posição: Acima da linha de "Cor", com destaque
+                    if (item.price && item.price.trim() !== "") {
+                        const priceText = `R$ ${item.price}`;
+                        doc.setFontSize(48); // Fonte maior para preço
+                        
+                        // Medir texto para desenhar o retângulo
+                        const textWidth = doc.getTextWidth(priceText);
+                        const paddingX = 40;
+                        const paddingY = 25;
+                        const badgeHeight = 90;
+                        const badgeWidth = textWidth + (paddingX * 2);
+                        
+                        // Posição do Badge (Acima da Cor + margem extra)
+                        const badgeBottomY = footerY - (lineHeight * 2) - 40; 
+                        const badgeX = pageWidth - margin - badgeWidth;
 
-                    // --- 3. IMAGEM PRINCIPAL ---
-                    // Calcular área livre exata
-                    const headerBottom = headerY + (logoDims.h || 100) + 60; // Margem abaixo do header
-                    const footerTop = footerY - lineHeight - 80; // Margem acima do footer (mais espaço para respiro)
+                        // Desenhar Retângulo Marrom Arredondado
+                        doc.setFillColor(brandColor); // #62311b
+                        doc.roundedRect(badgeX, badgeBottomY - badgeHeight, badgeWidth, badgeHeight, 30, 30, 'F');
+
+                        // Texto do Preço (Branco)
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFont("helvetica", "bold");
+                        // Centralizar texto no retângulo
+                        const textX = badgeX + (badgeWidth / 2);
+                        const textCenterY = badgeBottomY - (badgeHeight / 2) + 15; // Ajuste visual
+                        doc.text(priceText, textX, textCenterY, { align: 'center' });
+                    }
+
+                    // --- Imagem ---
+                    const headerBottom = headerY + (logoDims.h || 100) + 60;
+                    // Ajuste da área útil considerando o badge de preço
+                    const badgeSpace = item.price ? 200 : 80; 
+                    const footerTop = footerY - (lineHeight * 2) - badgeSpace;
                     
                     const availableW = pageWidth - (margin * 2);
                     const availableH = footerTop - headerBottom;
-
-                    // Placeholder area de debug (opcional, remover em prod)
-                    // doc.setDrawColor(200, 200, 200); doc.rect(margin, headerBottom, availableW, availableH); 
 
                     try {
                         let imgData = await readFileAsDataURL(item.file);
                         let img = await loadImage(imgData);
 
-                        // Lógica de Rotação Automática (Se for paisagem, vira retrato)
                         if (img.width > img.height) {
                             const canvas = document.createElement('canvas');
                             canvas.width = img.height;
@@ -624,14 +715,12 @@
                             ctx.translate(canvas.width / 2, canvas.height / 2);
                             ctx.rotate(90 * Math.PI / 180);
                             ctx.drawImage(img, -img.width / 2, -img.height / 2);
-                            imgData = canvas.toDataURL('image/jpeg', 0.95); // Alta qualidade
-                            img = await loadImage(imgData); // Recarregar dimensões
+                            imgData = canvas.toDataURL('image/jpeg', 0.95);
+                            img = await loadImage(imgData);
                         }
 
-                        // Lógica de Ajuste (Contain)
                         const imgRatio = img.width / img.height;
                         const areaRatio = availableW / availableH;
-                        
                         let finalW, finalH;
 
                         if (imgRatio > areaRatio) {
@@ -642,17 +731,13 @@
                             finalW = availableH * imgRatio;
                         }
 
-                        // Centralizar
                         const x = margin + (availableW - finalW) / 2;
                         const y = headerBottom + (availableH - finalH) / 2;
 
                         doc.addImage(imgData, 'JPEG', x, y, finalW, finalH);
 
-                    } catch (err) {
-                        console.error("Erro ao processar imagem", err);
-                    }
+                    } catch (err) { console.error(err); }
 
-                    // Atualizar Barra
                     const percent = Math.round(((i + 1) / catalogItems.length) * 100);
                     progressBar.style.width = `${percent}%`;
                     progressBar.textContent = `${percent}%`;
@@ -663,7 +748,7 @@
 
             } catch (error) {
                 console.error(error);
-                showStatus('Erro ao gerar PDF. Tente novamente.', 'error');
+                showStatus('Erro ao gerar PDF.', 'error');
             } finally {
                 setTimeout(() => {
                     progressContainer.classList.add('hidden');
@@ -672,20 +757,17 @@
             }
         }
 
-        // --- Helpers ---
         const readFileAsDataURL = (file) => new Promise((resolve) => {
             const r = new FileReader();
             r.onload = (e) => resolve(e.target.result);
             r.readAsDataURL(file);
         });
-
         const loadImage = (src) => new Promise((resolve, reject) => {
             const i = new Image();
             i.onload = () => resolve(i);
             i.onerror = reject;
             i.src = src;
         });
-
     </script>
 </body>
 </html>
